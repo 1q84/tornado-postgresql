@@ -1,10 +1,11 @@
 #!/usr/bin/env python
+#-*- coding:utf-8 -*-
 
-import itertools
-import logging
 import time
+import logging
 import psycopg2
-import types
+import itertools
+
 
 class Connection(object):
     """A lightweight wrapper around psycopg2 DB-API connections.
@@ -28,15 +29,15 @@ class Connection(object):
         self.database = database
         self.max_idle_time = max_idle_time
 
-        args = "dbname=%s"%self.database
+        args = "dbname=%s" % self.database
         if host is not None:
-            args += " host=%s"%host
+            args += " host=%s" % host
         if user is not None:
-            args += " user=%s"% user
+            args += " user=%s" % user
         if password is not None:
-            args += " password=%s"% password
+            args += " password=%s" % password
         if port is not None:
-            args += " port=%s"% port
+            args += " port=%s" % port
 
         self._db = None
         self._db_args = args
@@ -172,23 +173,13 @@ class Connection(object):
 
     def _execute(self, cursor, query, parameters):
         try:
-            self._db.rollback()
-            logging.info("DAOLog:ExecuteSql is %s"%cursor.mogrify(query, parameters))
+            logging.info("ExecuteSql is %s" % cursor.mogrify(query, parameters))
             cursor.execute(query, parameters)
             self._db.commit()
         except OperationalError:
-            logging.error("Error connecting to PostgreSQL on %s", self.host)
+            logging.error("Error connecting to PostgreSQL on %s" % self.host)
             self._db.rollback()
-            cursor.execute(query, parameters)
-            self._db.commit()
-            
-    def convert_point(self,param):
-        if type(param) is types.NoneType:
-            return 0
-        try:
-            return float(param)
-        except ValueError:
-            return 0
+
 
 class Row(dict):
     """A dict that allows for object-like property access syntax."""
